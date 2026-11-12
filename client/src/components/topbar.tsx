@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { logoutAction } from "@/actions/auth";
 
 export interface TopbarUser {
@@ -40,10 +40,6 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
     getThemeServerSnapshot
   );
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
-
   function toggleTheme() {
     const next = !dark;
     document.documentElement.classList.toggle("dark", next);
@@ -51,8 +47,7 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
     window.dispatchEvent(new Event("learnhub-theme"));
   }
 
-  const displayName = user?.name ?? "Guest";
-  const initial = displayName.charAt(0).toUpperCase();
+  const initial = user?.name ? user.name.charAt(0).toUpperCase() : "";
 
   return (
     <header
@@ -60,19 +55,28 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
         sidebarCollapsed ? "md:left-[72px]" : "md:left-[220px]"
       }`}
     >
-      {/* User avatar + full name */}
-      <Link
-        href={user ? "/admin" : "/auth"}
-        className="flex items-center gap-2.5 px-2 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors"
-        title={user ? "Go to Admin Dashboard" : "Student Login / Register"}
-      >
-        <div className="w-8 h-8 rounded-full bg-gray-900 dark:bg-neutral-800 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
-          {initial}
-        </div>
-        <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-neutral-200">
-          {displayName}
-        </span>
-      </Link>
+      {/* Show User Avatar + Name ONLY IF Logged In */}
+      {user ? (
+        <Link
+          href="/profile"
+          className="flex items-center gap-2.5 px-2 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors"
+          title="View My Profile"
+        >
+          <div className="w-8 h-8 rounded-full bg-gray-900 dark:bg-neutral-800 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
+            {initial}
+          </div>
+          <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-neutral-200">
+            {user.name}
+          </span>
+        </Link>
+      ) : (
+        <Link
+          href="/auth"
+          className="text-xs font-semibold px-3.5 py-1.5 rounded-full border border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-900 text-gray-700 dark:text-neutral-200 transition-colors"
+        >
+          Sign In
+        </Link>
+      )}
 
       {/* Theme toggle switch */}
       <button
@@ -92,7 +96,7 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
         />
       </button>
 
-      {/* Power button: logout if signed in, or login if guest */}
+      {/* Power button: logout if signed in, or link to /auth if guest */}
       {user ? (
         <form action={logoutAction}>
           <button
@@ -120,7 +124,7 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
           href="/auth"
           aria-label="Sign in"
           title="Sign in / Register"
-          className="min-h-10 min-w-10 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
+          className="min-h-10 min-w-10 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-900 transition-colors"
         >
           <svg
             width="18"
