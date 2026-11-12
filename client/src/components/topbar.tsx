@@ -62,9 +62,9 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
     >
       {/* User avatar + full name */}
       <Link
-        href={user ? "/admin" : "/admin/login"}
+        href={user ? "/admin" : "/auth"}
         className="flex items-center gap-2.5 px-2 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors"
-        title={user ? "Go to Admin Dashboard" : "Admin Sign in"}
+        title={user ? "Go to Admin Dashboard" : "Student Login / Register"}
       >
         <div className="w-8 h-8 rounded-full bg-gray-900 dark:bg-neutral-800 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0">
           {initial}
@@ -117,9 +117,9 @@ export function Topbar({ user, sidebarCollapsed }: TopbarProps) {
         </form>
       ) : (
         <Link
-          href="/admin/login"
+          href="/auth"
           aria-label="Sign in"
-          title="Sign in"
+          title="Sign in / Register"
           className="min-h-10 min-w-10 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800 transition-colors"
         >
           <svg
