@@ -49,3 +49,60 @@ model Lecture {
 
   @@index([courseId, position])
 }
+
+model Certificate {
+  id            Int      @id @default(autoincrement())
+  certCode      String   @unique
+  title         String
+  issuer        String
+  instructor    String
+  issueDate     String
+  grade         String
+  skills        String[]
+  verified      Boolean  @default(true)
+  credentialUrl String?
+  createdAt     DateTime @default(now())
+}
+
+model LearningProgress {
+  id                Int      @id @default(autoincrement())
+  courseId          Int?
+  title             String
+  instructor        String
+  completedLectures Int
+  totalLectures     Int
+  percent           Int
+  status            String
+  lastWatched       String
+  timeSpent         String
+  createdAt         DateTime @default(now())
+}
+
+model Discussion {
+  id          Int      @id @default(autoincrement())
+  title       String
+  category    String
+  author      String
+  avatar      String
+  replies     Int      @default(0)
+  upvotes     Int      @default(0)
+  time        String
+  badge       String?
+  courseLink  String?
+  courseTitle String?
+  createdAt   DateTime @default(now())
+}
+
+model Quiz {
+  id         Int      @id @default(autoincrement())
+  title      String
+  course     String
+  courseId   Int?
+  questions  Int
+  duration   String
+  difficulty String
+  passScore  String
+  status     String
+  bestScore  String?
+  createdAt  DateTime @default(now())
+}

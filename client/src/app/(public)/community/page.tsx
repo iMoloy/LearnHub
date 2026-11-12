@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { api } from "@/lib/api";
+import type { ApiResponse, Discussion } from "@/types";
 
 export const metadata: Metadata = {
   title: "Community Discussions — LearnHub",
   description: "Join discussions, ask questions, and collaborate with student peers on LearnHub.",
 };
 
-const DISCUSSIONS = [
+const FALLBACK_DISCUSSIONS: Discussion[] = [
   {
     id: 1,
     title: "How to avoid layout shifts (CLS) when loading responsive images in Next.js 16?",
@@ -19,6 +21,7 @@ const DISCUSSIONS = [
     badge: "Popular",
     courseLink: "/courses/3",
     courseTitle: "Full-Stack Web Development with Next.js 16",
+    createdAt: new Date().toISOString(),
   },
   {
     id: 2,
@@ -32,140 +35,25 @@ const DISCUSSIONS = [
     badge: "Staff Pick",
     courseLink: "/courses/4",
     courseTitle: "PostgreSQL & Database Performance Tuning",
-  },
-  {
-    id: 3,
-    title: "Best practice for structuring Figma Component Variants with Nested Auto-Layout",
-    category: "UI/UX Design",
-    author: "Ayesha Siddiqua",
-    avatar: "A",
-    replies: 19,
-    upvotes: 35,
-    time: "3 hours ago",
-    badge: "Solved",
-    courseLink: "/courses/2",
-    courseTitle: "Mastering Figma: From Concept to Production",
-  },
-  {
-    id: 4,
-    title: "Why does my YouTube facade video player load 10x faster on mobile devices?",
-    category: "Performance",
-    author: "Zubair Ahmed",
-    avatar: "Z",
-    replies: 9,
-    upvotes: 24,
-    time: "5 hours ago",
-    badge: "Discussion",
-    courseLink: "/courses/1",
-    courseTitle: "Become a UX Designer in 2024",
-  },
-  {
-    id: 5,
-    title: "Tailwind v4 CSS variables setup with AMOLED pure black theme: Snippet share",
-    category: "Tailwind CSS",
-    author: "Elena Rostova",
-    avatar: "E",
-    replies: 31,
-    upvotes: 89,
-    time: "7 hours ago",
-    badge: "Popular",
-    courseLink: "/courses/5",
-    courseTitle: "Modern Tailwind CSS",
-  },
-  {
-    id: 6,
-    title: "Multi-stage Docker build for Next.js standalone output: Saving 90% disk space",
-    category: "DevOps",
-    author: "Marcus Vance",
-    avatar: "M",
-    replies: 22,
-    upvotes: 53,
-    time: "9 hours ago",
-    badge: "Solved",
-    courseLink: "/courses/6",
-    courseTitle: "Docker & Containerization for Developers",
-  },
-  {
-    id: 7,
-    title: "How to handle form validation state properly using React 19's useActionState hook?",
-    category: "React 19",
-    author: "Maya Lin",
-    avatar: "M",
-    replies: 17,
-    upvotes: 48,
-    time: "12 hours ago",
-    badge: "Solved",
-    courseLink: "/courses/7",
-    courseTitle: "React 19 Deep Dive",
-  },
-  {
-    id: 8,
-    title: "JWT token in httpOnly cookie vs localStorage: Security analysis against XSS attacks",
-    category: "Security",
-    author: "Samir K. Patel",
-    avatar: "S",
-    replies: 45,
-    upvotes: 112,
-    time: "14 hours ago",
-    badge: "Staff Pick",
-    courseLink: "/courses/10",
-    courseTitle: "Web Security & Ethical Hacking Essentials",
-  },
-  {
-    id: 9,
-    title: "Clean Architecture in Express: Moving business logic completely out of Controllers",
-    category: "Backend",
-    author: "Jason Cooper",
-    avatar: "J",
-    replies: 12,
-    upvotes: 39,
-    time: "1 day ago",
-    badge: "Discussion",
-    courseLink: "/courses/8",
-    courseTitle: "RESTful API Engineering with Express",
-  },
-  {
-    id: 10,
-    title: "Python List Comprehensions vs map()/filter(): Which is faster in Python 3.12?",
-    category: "Python",
-    author: "Dr. Angela Barnes",
-    avatar: "A",
-    replies: 26,
-    upvotes: 62,
-    time: "1 day ago",
-    badge: "Discussion",
-    courseLink: "/courses/9",
-    courseTitle: "Complete Python Mastery",
-  },
-  {
-    id: 11,
-    title: "How to make motion UI accessible: Respecting prefers-reduced-motion media query",
-    category: "Accessibility",
-    author: "Chloe Dupont",
-    avatar: "C",
-    replies: 8,
-    upvotes: 29,
-    time: "2 days ago",
-    badge: "Solved",
-    courseLink: "/courses/11",
-    courseTitle: "UI/UX Micro-Interactions & Motion Design",
-  },
-  {
-    id: 12,
-    title: "Fixing Git detached HEAD state without losing uncommitted or stashed work",
-    category: "Git",
-    author: "Nathan Cole",
-    avatar: "N",
-    replies: 34,
-    upvotes: 75,
-    time: "2 days ago",
-    badge: "Popular",
-    courseLink: "/courses/12",
-    courseTitle: "Git, GitHub & Collaborative Workflows",
+    createdAt: new Date().toISOString(),
   },
 ];
 
-export default function CommunityPage() {
+async function getDiscussionsData(): Promise<Discussion[]> {
+  try {
+    const res = await api.get<ApiResponse<Discussion[]>>("/community", {
+      revalidate: 60,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Failed to fetch discussions from database API:", err);
+    return FALLBACK_DISCUSSIONS;
+  }
+}
+
+export default async function CommunityPage() {
+  const discussions = await getDiscussionsData();
+
   return (
     <section className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -189,7 +77,7 @@ export default function CommunityPage() {
       </div>
 
       <div className="space-y-3.5">
-        {DISCUSSIONS.map((item) => (
+        {discussions.map((item) => (
           <article
             key={item.id}
             className="bg-white dark:bg-black rounded-2xl border border-gray-100 dark:border-neutral-800 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow"
@@ -204,9 +92,11 @@ export default function CommunityPage() {
                   <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 dark:bg-neutral-900 dark:text-neutral-300">
                     {item.category}
                   </span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                    {item.badge}
-                  </span>
+                  {item.badge && (
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                      {item.badge}
+                    </span>
+                  )}
                   <span className="text-xs text-gray-400 dark:text-neutral-500">
                     {item.time}
                   </span>
@@ -218,10 +108,14 @@ export default function CommunityPage() {
 
                 <p className="text-xs text-gray-500 dark:text-neutral-400 mt-1 flex items-center gap-1.5 truncate">
                   <span>Started by <strong className="font-medium text-gray-700 dark:text-neutral-300">{item.author}</strong></span>
-                  <span>·</span>
-                  <Link href={item.courseLink} className="hover:underline truncate text-gray-400 dark:text-neutral-500">
-                    Course: {item.courseTitle}
-                  </Link>
+                  {item.courseTitle && (
+                    <>
+                      <span>·</span>
+                      <Link href={item.courseLink || "/courses"} className="hover:underline truncate text-gray-400 dark:text-neutral-500">
+                        Course: {item.courseTitle}
+                      </Link>
+                    </>
+                  )}
                 </p>
               </div>
             </div>

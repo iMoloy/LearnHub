@@ -1,13 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { api } from "@/lib/api";
+import type { ApiResponse, LearningProgress } from "@/types";
 
 export const metadata: Metadata = {
   title: "Learning Progress — LearnHub",
   description: "Track your active courses, lecture completion, and study time on LearnHub.",
 };
 
-const PROGRESS_DATA = [
+const FALLBACK_PROGRESS: LearningProgress[] = [
   {
+    id: 1,
     courseId: 1,
     title: "Become a UX Designer in 2024 (Beginner to Pro)",
     instructor: "Eichiro D. Lucky",
@@ -17,8 +20,10 @@ const PROGRESS_DATA = [
     status: "Completed",
     lastWatched: "Yesterday",
     timeSpent: "8h 30m",
+    createdAt: new Date().toISOString(),
   },
   {
+    id: 2,
     courseId: 2,
     title: "Mastering Figma: From Concept to Production",
     instructor: "Sarah Jenkins",
@@ -28,122 +33,26 @@ const PROGRESS_DATA = [
     status: "In Progress",
     lastWatched: "2 hours ago",
     timeSpent: "7h 45m",
-  },
-  {
-    courseId: 3,
-    title: "Full-Stack Web Development with Next.js 16 & TypeScript",
-    instructor: "Alex Rivera",
-    completedLectures: 2,
-    totalLectures: 3,
-    percent: 67,
-    status: "In Progress",
-    lastWatched: "Today",
-    timeSpent: "9h 50m",
-  },
-  {
-    courseId: 4,
-    title: "PostgreSQL & Database Performance Tuning",
-    instructor: "David Chen",
-    completedLectures: 3,
-    totalLectures: 3,
-    percent: 100,
-    status: "Completed",
-    lastWatched: "3 days ago",
-    timeSpent: "5h 20m",
-  },
-  {
-    courseId: 5,
-    title: "Modern Tailwind CSS: Crafting Beautiful SaaS Interfaces",
-    instructor: "Elena Rostova",
-    completedLectures: 2,
-    totalLectures: 3,
-    percent: 66,
-    status: "In Progress",
-    lastWatched: "Yesterday",
-    timeSpent: "4h 10m",
-  },
-  {
-    courseId: 6,
-    title: "Docker & Containerization for Modern Web Developers",
-    instructor: "Marcus Vance",
-    completedLectures: 1,
-    totalLectures: 3,
-    percent: 33,
-    status: "In Progress",
-    lastWatched: "5 days ago",
-    timeSpent: "2h 30m",
-  },
-  {
-    courseId: 7,
-    title: "React 19 Deep Dive: Hooks, Actions & Concurrent Mode",
-    instructor: "Maya Lin",
-    completedLectures: 3,
-    totalLectures: 3,
-    percent: 100,
-    status: "Completed",
-    lastWatched: "1 week ago",
-    timeSpent: "9h 15m",
-  },
-  {
-    courseId: 8,
-    title: "RESTful API Engineering with Express & Clean Architecture",
-    instructor: "Jason Cooper",
-    completedLectures: 2,
-    totalLectures: 3,
-    percent: 67,
-    status: "In Progress",
-    lastWatched: "4 days ago",
-    timeSpent: "5h 40m",
-  },
-  {
-    courseId: 9,
-    title: "Complete Python Mastery: From Basics to Data Science",
-    instructor: "Dr. Angela Barnes",
-    completedLectures: 3,
-    totalLectures: 3,
-    percent: 100,
-    status: "Completed",
-    lastWatched: "2 weeks ago",
-    timeSpent: "18h 30m",
-  },
-  {
-    courseId: 10,
-    title: "Web Security & Ethical Hacking Essentials",
-    instructor: "Samir K. Patel",
-    completedLectures: 1,
-    totalLectures: 3,
-    percent: 33,
-    status: "In Progress",
-    lastWatched: "3 days ago",
-    timeSpent: "3h 45m",
-  },
-  {
-    courseId: 11,
-    title: "UI/UX Micro-Interactions & Motion Design",
-    instructor: "Chloe Dupont",
-    completedLectures: 2,
-    totalLectures: 3,
-    percent: 66,
-    status: "In Progress",
-    lastWatched: "Just now",
-    timeSpent: "3h 50m",
-  },
-  {
-    courseId: 12,
-    title: "Git, GitHub & Collaborative Open-Source Workflows",
-    instructor: "Nathan Cole",
-    completedLectures: 3,
-    totalLectures: 3,
-    percent: 100,
-    status: "Completed",
-    lastWatched: "3 weeks ago",
-    timeSpent: "6h 15m",
+    createdAt: new Date().toISOString(),
   },
 ];
 
-export default function ProgressPage() {
-  const completedCount = PROGRESS_DATA.filter((c) => c.percent === 100).length;
-  const inProgressCount = PROGRESS_DATA.length - completedCount;
+async function getProgressData(): Promise<LearningProgress[]> {
+  try {
+    const res = await api.get<ApiResponse<LearningProgress[]>>("/progress", {
+      revalidate: 60,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Failed to fetch progress from database API:", err);
+    return FALLBACK_PROGRESS;
+  }
+}
+
+export default async function ProgressPage() {
+  const progressList = await getProgressData();
+  const completedCount = progressList.filter((c) => c.percent === 100).length;
+  const inProgressCount = progressList.length - completedCount;
 
   return (
     <section className="max-w-6xl mx-auto">
@@ -167,9 +76,9 @@ export default function ProgressPage() {
       </div>
 
       <div className="space-y-4">
-        {PROGRESS_DATA.map((item) => (
+        {progressList.map((item) => (
           <article
-            key={item.courseId}
+            key={item.id}
             className="bg-white dark:bg-black rounded-2xl border border-gray-100 dark:border-neutral-800 p-5 flex flex-col md:flex-row md:items-center justify-between gap-5 hover:shadow-md transition-shadow"
           >
             <div className="flex-1 min-w-0">
@@ -215,7 +124,7 @@ export default function ProgressPage() {
               </div>
 
               <Link
-                href={`/courses/${item.courseId}`}
+                href={item.courseId ? `/courses/${item.courseId}` : "/courses"}
                 className="text-center text-xs font-semibold py-2.5 px-4 rounded-xl bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-neutral-200 transition-colors whitespace-nowrap min-h-10 flex items-center justify-center"
               >
                 {item.percent === 100 ? "Review Course" : "Continue Lecture"}

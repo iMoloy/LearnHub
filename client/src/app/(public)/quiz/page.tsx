@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { api } from "@/lib/api";
+import type { ApiResponse, Quiz } from "@/types";
 
 export const metadata: Metadata = {
   title: "Quizzes & Assessments — LearnHub",
   description: "Test your skills with interactive topic quizzes and final assessments.",
 };
 
-const QUIZZES = [
+const FALLBACK_QUIZZES: Quiz[] = [
   {
     id: 1,
     title: "UX Design Principles & Heuristic Evaluation",
@@ -18,6 +20,7 @@ const QUIZZES = [
     passScore: "80%",
     status: "Completed",
     bestScore: "100%",
+    createdAt: new Date().toISOString(),
   },
   {
     id: 2,
@@ -30,130 +33,27 @@ const QUIZZES = [
     passScore: "75%",
     status: "Completed",
     bestScore: "92%",
-  },
-  {
-    id: 3,
-    title: "Next.js App Router, RSC & Cache Boundaries",
-    course: "Full-Stack Web Development with Next.js 16",
-    courseId: 3,
-    questions: 20,
-    duration: "25 mins",
-    difficulty: "Advanced",
-    passScore: "80%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 4,
-    title: "PostgreSQL Indexing, EXPLAIN & Performance",
-    course: "PostgreSQL & Database Performance Tuning",
-    courseId: 4,
-    questions: 15,
-    duration: "20 mins",
-    difficulty: "Advanced",
-    passScore: "80%",
-    status: "Completed",
-    bestScore: "87%",
-  },
-  {
-    id: 5,
-    title: "Tailwind CSS Utility Architecture & Variables",
-    course: "Modern Tailwind CSS",
-    courseId: 5,
-    questions: 10,
-    duration: "15 mins",
-    difficulty: "Beginner",
-    passScore: "70%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 6,
-    title: "Docker Container Lifecycle & Multi-Stage Builds",
-    course: "Docker & Containerization for Developers",
-    courseId: 6,
-    questions: 15,
-    duration: "20 mins",
-    difficulty: "Intermediate",
-    passScore: "75%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 7,
-    title: "React 19 Actions, useActionState & Compiler",
-    course: "React 19 Deep Dive",
-    courseId: 7,
-    questions: 15,
-    duration: "20 mins",
-    difficulty: "Intermediate",
-    passScore: "80%",
-    status: "Completed",
-    bestScore: "95%",
-  },
-  {
-    id: 8,
-    title: "RESTful HTTP Verbs, Idempotency & Status Codes",
-    course: "RESTful API Engineering with Express",
-    courseId: 8,
-    questions: 12,
-    duration: "15 mins",
-    difficulty: "Beginner",
-    passScore: "75%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 9,
-    title: "Python Memory Model, Generators & Decorators",
-    course: "Complete Python Mastery",
-    courseId: 9,
-    questions: 18,
-    duration: "25 mins",
-    difficulty: "Intermediate",
-    passScore: "75%",
-    status: "Completed",
-    bestScore: "90%",
-  },
-  {
-    id: 10,
-    title: "OWASP Top 10 Attack Vectors & Countermeasures",
-    course: "Web Security & Ethical Hacking Essentials",
-    courseId: 10,
-    questions: 20,
-    duration: "30 mins",
-    difficulty: "Advanced",
-    passScore: "85%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 11,
-    title: "CSS Animation Easing & Timing Functions",
-    course: "UI/UX Micro-Interactions & Motion Design",
-    courseId: 11,
-    questions: 10,
-    duration: "15 mins",
-    difficulty: "Beginner",
-    passScore: "70%",
-    status: "Available",
-    bestScore: null,
-  },
-  {
-    id: 12,
-    title: "Git Internal Objects, Trees & Reflog Recovery",
-    course: "Git, GitHub & Collaborative Workflows",
-    courseId: 12,
-    questions: 15,
-    duration: "20 mins",
-    difficulty: "Intermediate",
-    passScore: "80%",
-    status: "Completed",
-    bestScore: "100%",
+    createdAt: new Date().toISOString(),
   },
 ];
 
-export default function QuizPage() {
+async function getQuizzesData(): Promise<Quiz[]> {
+  try {
+    const res = await api.get<ApiResponse<Quiz[]>>("/quizzes", {
+      revalidate: 60,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Failed to fetch quizzes from database API:", err);
+    return FALLBACK_QUIZZES;
+  }
+}
+
+export default async function QuizPage() {
+  const quizzes = await getQuizzesData();
+  const completedCount = quizzes.filter((q) => q.status === "Completed").length;
+  const availableCount = quizzes.length - completedCount;
+
   return (
     <section className="max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -167,16 +67,16 @@ export default function QuizPage() {
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold">
           <span className="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            6 Completed
+            {completedCount} Completed
           </span>
           <span className="px-3 py-1.5 rounded-full bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-neutral-300">
-            6 Available
+            {availableCount} Available
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {QUIZZES.map((quiz) => (
+        {quizzes.map((quiz) => (
           <article
             key={quiz.id}
             className="bg-white dark:bg-black rounded-2xl border border-gray-100 dark:border-neutral-800 p-5 flex flex-col hover:shadow-md transition-shadow"
@@ -206,7 +106,7 @@ export default function QuizPage() {
               {quiz.title}
             </h2>
             <Link
-              href={`/courses/${quiz.courseId}`}
+              href={quiz.courseId ? `/courses/${quiz.courseId}` : "/courses"}
               className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline line-clamp-1 mb-4"
             >
               Course: {quiz.course}
@@ -230,7 +130,7 @@ export default function QuizPage() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
                       <path d="M20 6L9 17l-5-5" />
                     </svg>
-                    Score: {quiz.bestScore}
+                    Score: {quiz.bestScore || "Passed"}
                   </span>
                   <button
                     type="button"

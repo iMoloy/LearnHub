@@ -54,3 +54,60 @@ export interface ActionResult<T = void> {
   data?: T;
   error?: string;
 }
+
+export interface Certificate {
+  id: number;
+  certCode: string;
+  title: string;
+  issuer: string;
+  instructor: string;
+  issueDate: string;
+  grade: string;
+  skills: string[];
+  verified: boolean;
+  credentialUrl?: string | null;
+  createdAt: string;
+}
+
+export interface LearningProgress {
+  id: number;
+  courseId?: number | null;
+  title: string;
+  instructor: string;
+  completedLectures: number;
+  totalLectures: number;
+  percent: number;
+  status: string;
+  lastWatched: string;
+  timeSpent: string;
+  createdAt: string;
+}
+
+export interface Discussion {
+  id: number;
+  title: string;
+  category: string;
+  author: string;
+  avatar: string;
+  replies: number;
+  upvotes: number;
+  time: string;
+  badge?: string | null;
+  courseLink?: string | null;
+  courseTitle?: string | null;
+  createdAt: string;
+}
+
+export interface Quiz {
+  id: number;
+  title: string;
+  course: string;
+  courseId?: number | null;
+  questions: number;
+  duration: string;
+  difficulty: string;
+  passScore: string;
+  status: string;
+  bestScore?: string | null;
+  createdAt: string;
+}
