@@ -1,0 +1,57 @@
+"use server";
+
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import type { ActionResult } from "@/types";
+
+const COOKIE_NAME = process.env.SESSION_COOKIE_NAME ?? "learnhub_token";
+const API_URL = process.env.API_URL ?? "http://localhost:4000";
+
+export async function loginAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const email = formData.get("email")?.toString().trim() ?? "";
+  const password = formData.get("password")?.toString() ?? "";
+
+  if (!email || !password) {
+    return { success: false, error: "Email and password are required." };
+  }
+
+  let token: string;
+  try {
+    const res = await fetch(`${API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      cache: "no-store",
+    });
+
+    const json = await res.json();
+
+    if (!res.ok) {
+      return { success: false, error: json.message ?? "Invalid credentials." };
+    }
+
+    token = json.data.token as string;
+  } catch {
+    return { success: false, error: "Could not connect to the server." };
+  }
+
+  const store = await cookies();
+  store.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+    path: "/",
+  });
+
+  redirect("/admin");
+}
+
+export async function logoutAction(): Promise<void> {
+  const store = await cookies();
+  store.delete(COOKIE_NAME);
+  redirect("/admin/login");
+}
