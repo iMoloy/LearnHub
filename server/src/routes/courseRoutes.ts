@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { courseController } from "../controllers/courseController.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, requireAdmin } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validate.js";
 import {
   courseIdParamSchema,
@@ -27,6 +27,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
+  requireAdmin,
   validate({ body: createCourseSchema }),
   asyncHandler(courseController.create)
 );
@@ -34,6 +35,7 @@ router.post(
 router.put(
   "/:id",
   authMiddleware,
+  requireAdmin,
   validate({ params: courseIdParamSchema, body: updateCourseSchema }),
   asyncHandler(courseController.update)
 );
@@ -41,6 +43,7 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
+  requireAdmin,
   validate({ params: courseIdParamSchema }),
   asyncHandler(courseController.remove)
 );

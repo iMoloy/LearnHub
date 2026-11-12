@@ -20,6 +20,17 @@ export const userModel = {
     });
   },
 
+  create(data: { name: string; email: string; passwordHash: string }) {
+    return prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email.toLowerCase(),
+        passwordHash: data.passwordHash,
+        role: "STUDENT",
+      },
+    });
+  },
+
   upsertGoogleAdmin(data: { name: string; email: string; googleId: string }) {
     return prisma.user.upsert({
       where: { email: data.email.toLowerCase() },

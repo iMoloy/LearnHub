@@ -25,13 +25,21 @@ export function authMiddleware(
 
   try {
     const payload = verifyToken(token);
-    if (payload.role !== "ADMIN") {
-      next(new AppError("Forbidden", 403));
-      return;
-    }
     req.user = payload;
     next();
   } catch {
     next(new AppError("Invalid or expired token", 401));
   }
+}
+
+export function requireAdmin(
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+): void {
+  if (!req.user || req.user.role !== "ADMIN") {
+    next(new AppError("Forbidden: Admin access required", 403));
+    return;
+  }
+  next();
 }

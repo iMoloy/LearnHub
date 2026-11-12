@@ -14,12 +14,13 @@ model User {
   email        String   @unique
   passwordHash String?
   googleId     String?  @unique
-  role         Role     @default(ADMIN)
+  role         Role     @default(STUDENT)
   createdAt    DateTime @default(now())
 }
 
 enum Role {
   ADMIN
+  STUDENT
 }
 
 model Course {

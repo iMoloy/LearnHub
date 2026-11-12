@@ -4,7 +4,7 @@ import { env } from "../config/env.js";
 export interface JwtPayload {
   userId: number;
   email: string;
-  role: "ADMIN";
+  role: "ADMIN" | "STUDENT";
 }
 
 export function signToken(payload: JwtPayload): string {

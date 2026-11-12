@@ -8,6 +8,45 @@ import { AppError } from "../utils/AppError.js";
 import type { AuthenticatedRequest } from "../middleware/authMiddleware.js";
 
 export const authController = {
+  async register(req: Request, res: Response): Promise<void> {
+    const { name, email, password } = req.body as {
+      name: string;
+      email: string;
+      password: string;
+    };
+
+    const existing = await userModel.findByEmail(email);
+    if (existing) {
+      throw new AppError("An account with this email already exists", 409);
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await userModel.create({
+      name,
+      email,
+      passwordHash,
+    });
+
+    const token = signToken({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
+    });
+  },
+
   async login(req: Request, res: Response): Promise<void> {
     const { email, password } = req.body as { email: string; password: string };
 

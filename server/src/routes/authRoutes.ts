@@ -3,10 +3,17 @@ import { authController } from "../controllers/authController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { loginRateLimiter } from "../middleware/rateLimit.js";
 import { validate } from "../middleware/validate.js";
-import { googleAuthSchema, loginSchema } from "../validators/authSchema.js";
+import { googleAuthSchema, loginSchema, registerSchema } from "../validators/authSchema.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
+
+router.post(
+  "/register",
+  loginRateLimiter,
+  validate({ body: registerSchema }),
+  asyncHandler(authController.register)
+);
 
 router.post(
   "/login",

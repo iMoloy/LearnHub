@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { lectureController } from "../controllers/lectureController.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import { authMiddleware, requireAdmin } from "../middleware/authMiddleware.js";
 import { validate } from "../middleware/validate.js";
 import {
   courseIdLectureParamSchema,
@@ -21,6 +21,7 @@ router.get(
 router.post(
   "/courses/:courseId/lectures",
   authMiddleware,
+  requireAdmin,
   validate({ params: courseIdLectureParamSchema, body: createLectureSchema }),
   asyncHandler(lectureController.create)
 );
@@ -28,6 +29,7 @@ router.post(
 router.put(
   "/lectures/:id",
   authMiddleware,
+  requireAdmin,
   validate({ params: lectureIdParamSchema, body: updateLectureSchema }),
   asyncHandler(lectureController.update)
 );
@@ -35,6 +37,7 @@ router.put(
 router.delete(
   "/lectures/:id",
   authMiddleware,
+  requireAdmin,
   validate({ params: lectureIdParamSchema }),
   asyncHandler(lectureController.remove)
 );

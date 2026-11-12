@@ -5,6 +5,12 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
+export const registerSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
+  email: z.string().trim().email("Valid email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
 export const googleAuthSchema = z.object({
   code: z.string().min(1, "Authorization code is required"),
 });
