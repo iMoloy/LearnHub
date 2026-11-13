@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   if (error || !code || !state) {
     return NextResponse.redirect(
-      new URL("/admin/login?error=google_cancelled", request.url)
+      new URL("/auth?error=google_cancelled", request.url)
     );
   }
 
@@ -23,12 +23,14 @@ export async function GET(request: Request) {
 
   if (!savedState || savedState !== state) {
     return NextResponse.redirect(
-      new URL("/admin/login?error=invalid_state", request.url)
+      new URL("/auth?error=invalid_state", request.url)
     );
   }
 
   // Exchange code with our backend
   let token: string;
+  let userRole = "STUDENT";
+
   try {
     const res = await fetch(`${API_URL}/api/auth/google`, {
       method: "POST",
@@ -41,15 +43,16 @@ export async function GET(request: Request) {
     if (!res.ok) {
       return NextResponse.redirect(
         new URL(
-          `/admin/login?error=${encodeURIComponent(json.message ?? "google_error")}`,
+          `/auth?error=${encodeURIComponent(json.message ?? "google_error")}`,
           request.url
         )
       );
     }
-    token = json.data.token as string;
+    token = json.data?.token as string;
+    userRole = json.data?.user?.role ?? "STUDENT";
   } catch {
     return NextResponse.redirect(
-      new URL("/admin/login?error=server_error", request.url)
+      new URL("/auth?error=server_error", request.url)
     );
   }
 
@@ -61,5 +64,10 @@ export async function GET(request: Request) {
     path: "/",
   });
 
-  return NextResponse.redirect(new URL("/admin", request.url));
+  // Admins go to /admin, students go to home "/" where topbar displays their profile
+  if (userRole === "ADMIN") {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
+  return NextResponse.redirect(new URL("/", request.url));
 }

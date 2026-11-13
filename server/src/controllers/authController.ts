@@ -116,17 +116,19 @@ export const authController = {
     }
 
     const email = payload.email.toLowerCase();
-    const existingAdmin = await userModel.findByEmail(email);
-    const isAllowed = env.adminEmailList.includes(email) || existingAdmin !== null;
+    const existing = await userModel.findByEmail(email);
 
-    if (!isAllowed) {
-      throw new AppError("You are not authorized to access the admin panel", 403);
-    }
+    // If existing user is ADMIN or email is in admin list, assign ADMIN role; otherwise STUDENT
+    const role: "ADMIN" | "STUDENT" =
+      existing?.role === "ADMIN" || env.adminEmailList.includes(email)
+        ? "ADMIN"
+        : "STUDENT";
 
-    const user = await userModel.upsertGoogleAdmin({
+    const user = await userModel.upsertGoogleUser({
       name: payload.name ?? email.split("@")[0],
       email,
       googleId: payload.sub,
+      role,
     });
 
     const token = signToken({

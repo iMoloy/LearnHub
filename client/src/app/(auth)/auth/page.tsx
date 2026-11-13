@@ -1,12 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useActionState } from "react";
+import { useState, useActionState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { loginAction, registerAction } from "@/actions/auth";
 import type { ActionResult } from "@/types";
 
 const initialState: ActionResult = { success: false };
+
+function GoogleErrorAlert() {
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+  if (!error) return null;
+
+  const message =
+    error === "google_cancelled"
+      ? "Google sign-in was cancelled."
+      : error === "invalid_state"
+      ? "Security session expired. Please try again."
+      : decodeURIComponent(error);
+
+  return (
+    <div
+      role="alert"
+      className="mb-4 px-4 py-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300"
+    >
+      {message}
+    </div>
+  );
+}
 
 export default function AuthPage() {
   const [tab, setTab] = useState<"login" | "register">("login");
@@ -44,6 +67,10 @@ export default function AuthPage() {
             <BrandLogo />
           </Link>
         </div>
+
+        <Suspense fallback={null}>
+          <GoogleErrorAlert />
+        </Suspense>
 
         {/* Tab switcher: Login | Registration */}
         <div className="flex rounded-2xl bg-gray-100 dark:bg-neutral-900 p-1 mb-6">

@@ -31,7 +31,13 @@ export const userModel = {
     });
   },
 
-  upsertGoogleAdmin(data: { name: string; email: string; googleId: string }) {
+  upsertGoogleUser(data: {
+    name: string;
+    email: string;
+    googleId: string;
+    role?: "ADMIN" | "STUDENT";
+  }) {
+    const role = data.role ?? "STUDENT";
     return prisma.user.upsert({
       where: { email: data.email.toLowerCase() },
       update: {
@@ -42,7 +48,7 @@ export const userModel = {
         name: data.name,
         email: data.email.toLowerCase(),
         googleId: data.googleId,
-        role: "ADMIN",
+        role,
       },
     });
   },
