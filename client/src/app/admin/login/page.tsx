@@ -13,11 +13,19 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] dark:bg-black flex flex-col justify-between p-4 sm:p-6 transition-colors">
-      {/* Top bar with Back to Home button */}
-      <div className="flex items-center justify-between max-w-sm w-full mx-auto">
+      {/* Top bar: Website Logo & Name on LEFT, Back to Home button on RIGHT */}
+      <header className="w-full max-w-sm mx-auto flex items-center justify-between py-2 sm:py-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors min-h-10"
+          className="inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+          aria-label="LearnHub Home"
+        >
+          <BrandLogo subtitle="Admin" />
+        </Link>
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white px-3.5 py-2 rounded-xl border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors min-h-10"
         >
           <svg
             width="14"
@@ -32,16 +40,10 @@ export default function AdminLoginPage() {
           </svg>
           Back to Home
         </Link>
-      </div>
+      </header>
 
       {/* Main card */}
-      <div className="w-full max-w-sm mx-auto bg-white dark:bg-black rounded-3xl border border-gray-100 dark:border-neutral-800 shadow-sm p-6 sm:p-8 my-8">
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <Link href="/">
-            <BrandLogo subtitle="Admin" />
-          </Link>
-        </div>
+      <div className="w-full max-w-sm mx-auto bg-white dark:bg-black rounded-3xl border border-gray-100 dark:border-neutral-800 shadow-sm p-6 sm:p-8 my-auto">
 
         <div className="text-center mb-6">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
