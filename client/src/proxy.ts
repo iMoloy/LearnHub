@@ -16,14 +16,6 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  // Redirect logged-in users away from /admin/login
-  if (pathname === "/admin/login") {
-    const token = request.cookies.get(COOKIE_NAME)?.value;
-    if (token) {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-  }
-
   return NextResponse.next();
 }
 

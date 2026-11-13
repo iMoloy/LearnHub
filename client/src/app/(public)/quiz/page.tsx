@@ -39,7 +39,7 @@ const FALLBACK_QUIZZES: Quiz[] = [
 
 async function getQuizzesData(): Promise<Quiz[]> {
   try {
-    const res = await api.get<ApiResponse<Quiz[]>>("/quizzes", {
+    const res = await api.get<ApiResponse<Quiz[]>>("/api/quizzes", {
       revalidate: 60,
     });
     return res.data;

@@ -81,24 +81,38 @@ export const authController = {
   },
 
   async googleLogin(req: Request, res: Response): Promise<void> {
-    if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET || !env.GOOGLE_REDIRECT_URI) {
+    if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
       throw new AppError("Google OAuth is not configured on the server", 500);
     }
 
-    const { code } = req.body as { code: string };
+    const { code, redirectUri } = req.body as { code: string; redirectUri?: string };
+    const effectiveRedirectUri = redirectUri || env.GOOGLE_REDIRECT_URI;
 
     const client = new OAuth2Client(
       env.GOOGLE_CLIENT_ID,
       env.GOOGLE_CLIENT_SECRET,
-      env.GOOGLE_REDIRECT_URI
+      effectiveRedirectUri
     );
 
     let tokens;
     try {
-      const response = await client.getToken(code);
+      const response = await client.getToken({
+        code,
+        redirect_uri: effectiveRedirectUri,
+      });
       tokens = response.tokens;
-    } catch {
-      throw new AppError("Invalid Google authorization code", 401);
+    } catch (err: unknown) {
+      const errorObj = err as {
+        response?: { data?: { error_description?: string; error?: string } };
+        message?: string;
+      };
+      const details =
+        errorObj?.response?.data?.error_description ||
+        errorObj?.response?.data?.error ||
+        errorObj?.message ||
+        "Invalid Google authorization code";
+      console.error("Google token exchange error:", details);
+      throw new AppError(`Google login error: ${details}`, 401);
     }
 
     if (!tokens.id_token) {

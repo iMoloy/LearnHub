@@ -1,18 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { logoutAction } from "@/actions/auth";
 import { BrandLogo } from "@/components/brand-logo";
+import { api } from "@/lib/api";
+import { getToken } from "@/lib/session";
 
 export const metadata: Metadata = {
   title: { default: "Admin — LearnHub", template: "%s | Admin · LearnHub" },
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({
+async function checkAdmin(): Promise<boolean> {
+  const token = await getToken();
+  if (!token) return false;
+  try {
+    const res = await api.get<{ success: true; data: { role: string } }>(
+      "/api/auth/me",
+      { token, revalidate: 0 }
+    );
+    return res.data.role === "ADMIN";
+  } catch {
+    return false;
+  }
+}
+
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const isAdmin = await checkAdmin();
+  if (!isAdmin) {
+    redirect("/admin/login");
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Admin top bar */}

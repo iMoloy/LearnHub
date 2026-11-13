@@ -30,12 +30,14 @@ export async function GET(request: Request) {
   // Exchange code with our backend
   let token: string;
   let userRole = "STUDENT";
+  const origin = new URL(request.url).origin;
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
 
   try {
     const res = await fetch(`${API_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, redirectUri }),
       cache: "no-store",
     });
 

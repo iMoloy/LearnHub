@@ -108,5 +108,5 @@ export async function loginAction(
 export async function logoutAction(): Promise<void> {
   const store = await cookies();
   store.delete(COOKIE_NAME);
-  redirect("/admin/login");
+  redirect("/auth");
 }

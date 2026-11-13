@@ -41,7 +41,7 @@ const FALLBACK_DISCUSSIONS: Discussion[] = [
 
 async function getDiscussionsData(): Promise<Discussion[]> {
   try {
-    const res = await api.get<ApiResponse<Discussion[]>>("/community", {
+    const res = await api.get<ApiResponse<Discussion[]>>("/api/community", {
       revalidate: 60,
     });
     return res.data;

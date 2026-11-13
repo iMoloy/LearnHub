@@ -39,7 +39,7 @@ const FALLBACK_PROGRESS: LearningProgress[] = [
 
 async function getProgressData(): Promise<LearningProgress[]> {
   try {
-    const res = await api.get<ApiResponse<LearningProgress[]>>("/progress", {
+    const res = await api.get<ApiResponse<LearningProgress[]>>("/api/progress", {
       revalidate: 60,
     });
     return res.data;

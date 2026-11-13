@@ -39,7 +39,7 @@ const FALLBACK_CERTIFICATES: Certificate[] = [
 
 async function getCertificatesData(): Promise<Certificate[]> {
   try {
-    const res = await api.get<ApiResponse<Certificate[]>>("/certificates", {
+    const res = await api.get<ApiResponse<Certificate[]>>("/api/certificates", {
       revalidate: 60,
     });
     return res.data;
